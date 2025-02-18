@@ -7,6 +7,9 @@ WORKDIR /app
 ARG MONGODB_URI
 ENV MONGODB_URI=$MONGODB_URI
 
+# Create public directory
+RUN mkdir -p public
+
 # Copy package files
 COPY package*.json ./
 
@@ -24,13 +27,16 @@ FROM node:18-alpine AS runner
 
 WORKDIR /app
 
-# Set environment variables
+# Add build arguments in runner stage
+ARG MONGODB_URI
 ENV NODE_ENV=production
-ENV MONGODB_URI=$MONGODB_URI
+ENV MONGODB_URI=${MONGODB_URI}
+
+# Create public directory
+RUN mkdir -p public
 
 # Copy necessary files from builder
 COPY --from=builder /app/next.config.js ./
-COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
