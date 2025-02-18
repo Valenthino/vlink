@@ -53,11 +53,19 @@ export default async function handler(
       });
     }
 
+    console.log('Generating short URL for:', originalUrl);
+    
     // Generate short URL
     const shortCode = await generateShortUrl(originalUrl, customCode);
-
+    
+    // Get the base URL from environment or request
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                   `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}`;
+    
     // Construct the full short URL
-    const shortUrl = `${process.env.NEXT_PUBLIC_BASE_URL || `https://${req.headers.host}`}/${shortCode}`;
+    const shortUrl = `${baseUrl}/${shortCode}`;
+    
+    console.log('Generated short URL:', shortUrl);
 
     return res.status(200).json({
       success: true,
@@ -90,6 +98,13 @@ export default async function handler(
           }
         });
       }
+
+      // Log the full error details
+      console.error('Detailed error:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
     }
 
     // Generic error response
@@ -97,7 +112,8 @@ export default async function handler(
       success: false,
       error: {
         code: 'INTERNAL_ERROR',
-        message: 'An unexpected error occurred'
+        message: 'An unexpected error occurred',
+        details: process.env.NODE_ENV === 'development' ? { error: error instanceof Error ? error.message : String(error) } : undefined
       }
     });
   }
