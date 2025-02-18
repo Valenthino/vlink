@@ -63,14 +63,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link
-          rel="stylesheet"
-          type="text/css"
-          href="https://cloud.typography.com/6704632/6693372/css/fonts.css"
-        />
-      </head>
-      <body className={`font-gotham min-h-screen bg-gradient-to-b from-background to-background/80 ${inter.className}`}>
+      <body className={`min-h-screen bg-gradient-to-b from-background to-background/80 ${inter.className}`}>
         <Providers>{children}</Providers>
       </body>
     </html>

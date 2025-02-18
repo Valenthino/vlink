@@ -18,7 +18,7 @@ interface ErrorResponse {
   error: {
     code: string;
     message: string;
-    details?: object;
+    details?: any;
   };
 }
 
@@ -38,10 +38,20 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiResponse>
 ) {
-  console.log('Received request:', {
+  // Log request details
+  console.log('API Request:', {
     method: req.method,
-    headers: req.headers,
+    headers: {
+      ...req.headers,
+      host: req.headers.host,
+      'x-forwarded-proto': req.headers['x-forwarded-proto']
+    },
     body: req.body,
+    env: {
+      NODE_ENV: process.env.NODE_ENV,
+      MONGODB_URI: process.env.MONGODB_URI ? 'Set' : 'Not Set',
+      BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'Not Set'
+    }
   });
 
   // Only allow POST method
@@ -84,11 +94,14 @@ export default async function handler(
     
     // Generate short URL
     const shortCode = await generateShortUrl(originalUrl, customCode);
+    console.log('Generated short code:', shortCode);
     
     // Get the base URL from environment or request
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const host = req.headers.host || 'vlink.vavqo.com';
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`;
+    
+    console.log('URL construction:', { protocol, host, baseUrl });
     
     // Construct the full short URL
     const shortUrl = `${baseUrl}/${shortCode}`;
@@ -103,7 +116,19 @@ export default async function handler(
     });
 
   } catch (error) {
-    console.error('Error creating short URL:', error);
+    console.error('Detailed error in /api/create:', {
+      error,
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      errorStack: error instanceof Error ? error.stack : undefined,
+      errorName: error instanceof Error ? error.name : undefined,
+      requestBody: req.body,
+      requestHeaders: req.headers,
+      environment: {
+        NODE_ENV: process.env.NODE_ENV,
+        MONGODB_URI: process.env.MONGODB_URI ? 'Set' : 'Not Set',
+        BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'Not Set'
+      }
+    });
 
     // Handle specific known errors
     if (error instanceof Error) {
@@ -112,7 +137,8 @@ export default async function handler(
           success: false,
           error: {
             code: 'INVALID_URL',
-            message: 'The provided URL is not valid'
+            message: 'The provided URL is not valid',
+            details: { originalError: error.message }
           }
         });
       }
@@ -122,26 +148,35 @@ export default async function handler(
           success: false,
           error: {
             code: 'CUSTOM_CODE_TAKEN',
-            message: 'The requested custom code is already in use'
+            message: 'The requested custom code is already in use',
+            details: { originalError: error.message }
           }
         });
       }
 
-      // Log the full error details
-      console.error('Detailed error:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
+      if (error.message.includes('MongoDB')) {
+        return res.status(500).json({
+          success: false,
+          error: {
+            code: 'DATABASE_ERROR',
+            message: 'Database connection error',
+            details: { originalError: error.message }
+          }
+        });
+      }
     }
 
-    // Generic error response
+    // Generic error response with more details
     return res.status(500).json({
       success: false,
       error: {
         code: 'INTERNAL_ERROR',
         message: 'An unexpected error occurred while creating the short URL',
-        details: process.env.NODE_ENV === 'development' ? { error: error instanceof Error ? error.message : String(error) } : undefined
+        details: {
+          errorMessage: error instanceof Error ? error.message : String(error),
+          errorType: error instanceof Error ? error.name : typeof error,
+          timestamp: new Date().toISOString()
+        }
       }
     });
   }
