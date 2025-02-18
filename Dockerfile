@@ -3,6 +3,10 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+# Add build arguments
+ARG MONGODB_URI
+ENV MONGODB_URI=$MONGODB_URI
+
 # Copy package files
 COPY package*.json ./
 
@@ -22,6 +26,7 @@ WORKDIR /app
 
 # Set environment variables
 ENV NODE_ENV=production
+ENV MONGODB_URI=$MONGODB_URI
 
 # Copy necessary files from builder
 COPY --from=builder /app/next.config.js ./
