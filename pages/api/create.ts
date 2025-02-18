@@ -24,10 +24,26 @@ interface ErrorResponse {
 
 type ApiResponse = SuccessResponse | ErrorResponse;
 
+// Validate URL format
+function isValidUrl(url: string): boolean {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiResponse>
 ) {
+  console.log('Received request:', {
+    method: req.method,
+    headers: req.headers,
+    body: req.body,
+  });
+
   // Only allow POST method
   if (req.method !== 'POST') {
     return res.status(405).json({
@@ -42,7 +58,7 @@ export default async function handler(
   try {
     const { originalUrl, customCode } = req.body as CreateUrlRequest;
 
-    // Check if originalUrl is provided
+    // Validate request body
     if (!originalUrl) {
       return res.status(400).json({
         success: false,
@@ -53,14 +69,26 @@ export default async function handler(
       });
     }
 
+    // Validate URL format
+    if (!isValidUrl(originalUrl)) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_URL',
+          message: 'Please enter a valid URL'
+        }
+      });
+    }
+
     console.log('Generating short URL for:', originalUrl);
     
     // Generate short URL
     const shortCode = await generateShortUrl(originalUrl, customCode);
     
     // Get the base URL from environment or request
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-                   `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}`;
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers.host || 'vlink.vavqo.com';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`;
     
     // Construct the full short URL
     const shortUrl = `${baseUrl}/${shortCode}`;
@@ -112,7 +140,7 @@ export default async function handler(
       success: false,
       error: {
         code: 'INTERNAL_ERROR',
-        message: 'An unexpected error occurred',
+        message: 'An unexpected error occurred while creating the short URL',
         details: process.env.NODE_ENV === 'development' ? { error: error instanceof Error ? error.message : String(error) } : undefined
       }
     });

@@ -16,11 +16,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: {
-    default: "VLink - URL Shortener",
-    template: "%s | VLink",
-  },
-  description: "Shorten your URLs with style. Create custom short links and QR codes instantly.",
+  title: 'VLink - URL Shortener',
+  description: 'A modern URL shortening service built with Next.js and MongoDB',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://vlink.vavqo.com'),
   keywords: ["URL shortener", "link shortener", "QR code generator", "short URL", "custom links"],
   authors: [{ name: "Valentin Sawadogo" }],
   creator: "Valentin Sawadogo",
@@ -38,11 +36,11 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
-    type: "website",
+    title: 'VLink - URL Shortener',
+    description: 'A modern URL shortening service built with Next.js and MongoDB',
+    type: 'website',
     locale: "en_US",
     url: "https://vlink.vercel.app",
-    title: "VLink - URL Shortener",
-    description: "Shorten your URLs with style. Create custom short links and QR codes instantly.",
     siteName: "VLink",
     images: [{
       url: "/og-image.png",
@@ -52,18 +50,17 @@ export const metadata: Metadata = {
     }],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "VLink - URL Shortener",
-    description: "Shorten your URLs with style. Create custom short links and QR codes instantly.",
-    images: ["/og-image.png"],
+    card: 'summary_large_image',
+    title: 'VLink - URL Shortener',
+    description: 'A modern URL shortening service built with Next.js and MongoDB',
   },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>

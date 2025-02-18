@@ -22,6 +22,17 @@ export default function Home() {
     setShowQR(false);
 
     try {
+      if (!url) {
+        throw new Error('Please enter a URL');
+      }
+
+      // Validate URL format
+      try {
+        new URL(url);
+      } catch {
+        throw new Error('Please enter a valid URL');
+      }
+
       const response = await fetch('/api/create', {
         method: 'POST',
         headers: {
@@ -36,21 +47,33 @@ export default function Home() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error.message);
+        throw new Error(data.error?.message || 'Failed to create short URL');
+      }
+
+      if (!data.success || !data.data?.shortUrl) {
+        throw new Error('Invalid response from server');
       }
 
       setShortUrl(data.data.shortUrl);
+      setError('');
     } catch (err) {
+      console.error('Error shortening URL:', err);
       setError(err instanceof Error ? err.message : 'Something went wrong');
+      setShortUrl('');
     } finally {
       setLoading(false);
     }
   };
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(shortUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(shortUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      setError('Failed to copy to clipboard');
+    }
   };
 
   return (
