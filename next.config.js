@@ -11,10 +11,9 @@ const nextConfig = {
     ],
   },
   experimental: {
-    optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
-    serverActions: true,
+    optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react']
   },
-  output: 'standalone',
+  output: 'standalone'
 }
 
 module.exports = nextConfig 
