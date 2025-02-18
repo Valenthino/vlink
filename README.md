@@ -36,10 +36,28 @@ This is a simple link-shortening web app built with:
    ```
 
 4. **Docker Deployment:**
+
+   There are several ways to run the application with Docker:
+
+   a. Using docker-compose for development:
    ```bash
-   docker build -t link-shortener .
-   docker run -p 3000:3000 link-shortener
+   docker-compose up app-dev
    ```
+
+   b. Using docker-compose for production:
+   ```bash
+   docker-compose up app-prod
+   ```
+
+   c. Using Docker directly:
+   ```bash
+   docker build -t url-shortener .
+   docker run -p 3000:3000 -e MONGODB_URI=your_mongodb_uri url-shortener
+   ```
+
+   d. For Coolify deployment:
+   - Add your MongoDB URI in the Coolify environment variables
+   - Deploy using the provided Dockerfile
 
 ## Database Schema
 
