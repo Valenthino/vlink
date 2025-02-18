@@ -1,25 +1,25 @@
+import { headers } from "next/headers";
 
-/* import Hero from "@/components/hero";
-import ConnectSupabaseSteps from "@/components/tutorial/connect-supabase-steps";
-import SignUpUserSteps from "@/components/tutorial/sign-up-user-steps";
-import { hasEnvVars } from "@/utils/supabase/check-env-vars";
+export default async function Index() {
+  const headersList = headers();
+  const host = headersList.get("host") || "";
 
-export default async function Home() {
   return (
-    <>
-      <Hero />
-      <main className="flex-1 flex flex-col gap-6 px-4">
-        <h2 className="font-medium text-xl mb-4">Next steps</h2>
-        {hasEnvVars ? <SignUpUserSteps /> : <ConnectSupabaseSteps />}
-      </main>
-    </>
+    <div className="flex-1 w-full flex flex-col gap-20 items-center">
+      <div className="w-full">
+        <div className="py-16 sm:py-20">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+              <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
+                URL Shortener
+              </h1>
+              <p className="mt-6 text-lg leading-8 text-gray-600">
+                A modern URL shortening service built with Next.js and MongoDB.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-} */ // OLD CODE
-
-// pages/_app.tsx
-import '../styles/globals.css'; // Import global Tailwind styles
-import type { AppProps } from 'next/app';
-
-export default function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
 }

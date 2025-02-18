@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link2 } from 'lucide-react';
+import { Link2, QrCode } from 'lucide-react';
+import { QRCode } from '@/components/ui/qr-code';
 
 export default function Home() {
   const [url, setUrl] = useState('');
@@ -11,12 +12,14 @@ export default function Home() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showQR, setShowQR] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setShortUrl('');
     setLoading(true);
+    setShowQR(false);
 
     try {
       const response = await fetch('/api/create', {
@@ -157,7 +160,26 @@ export default function Home() {
               >
                 {copied ? 'Copied!' : 'Copy'}
               </button>
+              <button
+                onClick={() => setShowQR(!showQR)}
+                className="p-3 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-colors"
+                title="Generate QR Code"
+              >
+                <QrCode className="w-5 h-5" />
+              </button>
             </div>
+
+            {/* QR Code */}
+            {showQR && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="flex justify-center pt-4"
+              >
+                <QRCode url={shortUrl} />
+              </motion.div>
+            )}
           </motion.div>
         )}
 

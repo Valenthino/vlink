@@ -1,5 +1,5 @@
 import { GetServerSideProps } from 'next';
-import { getOriginalUrl } from '../lib/url-service';
+import clientPromise from '../lib/db';
 
 // This page handles the redirection
 export default function RedirectPage() {
@@ -8,35 +8,30 @@ export default function RedirectPage() {
   return null;
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ params, req, res }) => {
+export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   try {
-    const shortCode = params?.slug as string;
+    const client = await clientPromise;
+    const db = client.db();
+    const slug = params?.slug as string;
 
-    if (!shortCode) {
+    const url = await db.collection('urls').findOne({ slug });
+
+    if (!url) {
       return {
-        notFound: true
+        notFound: true,
       };
     }
 
-    // Get the original URL and track the visit
-    const originalUrl = await getOriginalUrl(shortCode, {
-      userAgent: req.headers['user-agent'],
-      ipAddress: req.headers['x-forwarded-for']?.toString() || req.socket.remoteAddress,
-      referrer: req.headers.referer
-    });
-
-    // Permanent redirect (301) to the original URL
     return {
       redirect: {
-        destination: originalUrl,
-        permanent: true // This helps with SEO and caching
-      }
+        destination: url.longUrl,
+        permanent: false,
+      },
     };
   } catch (error) {
-    // If the URL is not found or any other error occurs,
-    // return 404 page
+    console.error('Error fetching URL:', error);
     return {
-      notFound: true
+      notFound: true,
     };
   }
 }; 
