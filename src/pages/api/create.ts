@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { generateShortUrl } from '../../lib/url-service';
+import { generateShortUrl } from '@/lib/url-service';
 
 interface CreateUrlRequest {
   originalUrl: string;

@@ -1,5 +1,5 @@
 import { GetServerSideProps } from 'next';
-import clientPromise from '../lib/db';
+import clientPromise from '@/lib/db';
 
 // This page handles the redirection
 export default function RedirectPage() {

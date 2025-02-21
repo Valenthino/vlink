@@ -26,23 +26,19 @@ export interface QRCodeInfo {
   segments: number;
 }
 
-export async function generateQRCode(url: string, options: QRCodeOptions = {}) {
-  const defaultOptions: QRCodeToDataURLOptions = {
-    width: 400,
-    margin: 1,
-    color: {
-      dark: '#000000',
-      light: '#ffffff',
-    },
-    errorCorrectionLevel: 'M',
-    quality: 0.92,
-    scale: 4,
-    ...options,
-  };
-
+export async function generateQR(url: string, options: QRCodeOptions = {}) {
   try {
-    const dataUrl = await QRCode.toDataURL(url, defaultOptions);
-    return dataUrl;
+    const qrDataUrl = await QRCode.toDataURL(url, {
+      width: options.width || 200,
+      margin: options.margin || 2,
+      color: {
+        dark: options.color?.dark || '#000000',
+        light: options.color?.light || '#FFFFFF',
+      },
+      errorCorrectionLevel: options.errorCorrectionLevel || 'M',
+    });
+
+    return qrDataUrl;
   } catch (error) {
     console.error('Error generating QR code:', error);
     throw new Error('Failed to generate QR code');
